@@ -10,6 +10,10 @@ img {
     max-width: 90%;
 }
 
+ul {
+    list-style-type: square;
+}
+
 /* Class dependent part */
 
 /* Header */
