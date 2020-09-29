@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="generator" content="pandoc" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+            <meta name="author" content="Iago Leal de Freitas" />
+                <meta name="dcterms.date" content="2020-09-20" />
+                <meta name="keywords" content="fft, haskell, recursion-schemes, functional-programming" />
+            <title>FFT as a Hylomorphism</title>
+        <style>
+            code{white-space: pre-wrap;}
+            span.smallcaps{font-variant: small-caps;}
+            span.underline{text-decoration: underline;}
+            div.column{display: inline-block; vertical-align: top; width: 50%;}
+            div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+            ul.task-list{list-style: none;}
+            pre > code.sourceCode { white-space: pre; position: relative; }
+            pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+            pre > code.sourceCode > span:empty { height: 1.2em; }
+            code.sourceCode > span { color: inherit; text-decoration: inherit; }
+            div.sourceCode { margin: 1em 0; }
+            pre.sourceCode { margin: 0; }
+            @media screen {
+            div.sourceCode { overflow: auto; }
+            }
+            @media print {
+            pre > code.sourceCode { white-space: pre-wrap; }
+            pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+            }
+            pre.numberSource code
+              { counter-reset: source-line 0; }
+            pre.numberSource code > span
+              { position: relative; left: -4em; counter-increment: source-line; }
+            pre.numberSource code > span > a:first-child::before
+              { content: counter(source-line);
+                position: relative; left: -1em; text-align: right; vertical-align: baseline;
+                border: none; display: inline-block;
+                -webkit-touch-callout: none; -webkit-user-select: none;
+                -khtml-user-select: none; -moz-user-select: none;
+                -ms-user-select: none; user-select: none;
+                padding: 0 4px; width: 4em;
+                background-color: #ffffff;
+                color: #a0a0a0;
+              }
+            pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+            div.sourceCode
+              { color: #1f1c1b; background-color: #ffffff; }
+            @media screen {
+            pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+            }
+            code span { color: #1f1c1b; } /* Normal */
+            code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+            code span.an { color: #ca60ca; } /* Annotation */
+            code span.at { color: #0057ae; } /* Attribute */
+            code span.bn { color: #b08000; } /* BaseN */
+            code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+            code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+            code span.ch { color: #924c9d; } /* Char */
+            code span.cn { color: #aa5500; } /* Constant */
+            code span.co { color: #898887; } /* Comment */
+            code span.cv { color: #0095ff; } /* CommentVar */
+            code span.do { color: #607880; } /* Documentation */
+            code span.dt { color: #0057ae; } /* DataType */
+            code span.dv { color: #b08000; } /* DecVal */
+            code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+            code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+            code span.fl { color: #b08000; } /* Float */
+            code span.fu { color: #644a9b; } /* Function */
+            code span.im { color: #ff5500; } /* Import */
+            code span.in { color: #b08000; } /* Information */
+            code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+            code span.op { color: #1f1c1b; } /* Operator */
+            code span.ot { color: #006e28; } /* Other */
+            code span.pp { color: #006e28; } /* Preprocessor */
+            code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+            code span.sc { color: #3daee9; } /* SpecialChar */
+            code span.ss { color: #ff5500; } /* SpecialString */
+            code span.st { color: #bf0303; } /* String */
+            code span.va { color: #0057ae; } /* Variable */
+            code span.vs { color: #bf0303; } /* VerbatimString */
+            code span.wa { color: #bf0303; } /* Warning */
+        </style>
+        <link rel="stylesheet" href="/css/sakura-earthly.css"/>
+        <link rel="stylesheet" href="/css/krkis.css"/>
+        <link rel="stylesheet" href="/css/theorems.css"/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js"></script>
+                <script>document.addEventListener("DOMContentLoaded", function () {
+                 var mathElements = document.getElementsByClassName("math");
+                 for (var i = 0; i < mathElements.length; i++) {
+                  var texText = mathElements[i].firstChild;
+                  if (mathElements[i].tagName == "SPAN") {
+                   katex.render(texText.data, mathElements[i], {
+                    displayMode: mathElements[i].classList.contains('display'),
+                    throwOnError: false,
+                    fleqn: false
+                   });
+                }}});
+                </script>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" />
+            <!--[if lt IE 9]>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+        <![endif]-->
+        </head>
+<body>
+<header id="top-bar">
+    <nav>
+        <ul>
+            <div class="home-button">
+                <li><a href="/">home</a></li>
+            </div>
+            <div class="nav-links">
+                <li><a href="/posts/">Blog</a></li>
+                <li><a href="/projects/">Projects</a></li>
+                <li><a href="https://github.com/iagoleal">Github</a></li>
+            </div>
+        </ul>
+        <hr/>
+    </nav>
+</header><header id="title-block-header">
+    <header class="subheading">
+        <h1 class="title">FFT as a Hylomorphism</h1>
+                <p>A Haskell Example</p>
+            </header>
+            <p class="date">2020-09-20</p>
+    </header>
+<p>After writing the <a href="/posts/recursion-schemes/">previous post</a>, I kept wondering what would be a good, more “real life” example of recursion schemes in action. Some days ago, I noticed that one of my favorite algorithms can be written as a hylomorphism.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm">Fast Fourier Transform</a> (FFT for short) uses a divide-and-conquer strategy to allow us to calculate the discrete Fourier transform in <span class="math inline">O(N \log N)</span> (where <span class="math inline">N</span> is the length of the input). It has a myriad of applications, specially in signal processing and data analysis.</p>
+<p>But today I am not explaining it. Oh no, that would require a much longer post. Today we will only use the FFT as an example of how to write a fully fetched algorithm using neither loops nor explicit recursion. Since it is more complicated than the previous post’s examples, this time we will need a real programming language, thus everything will be in Haskell. I did this implementation as an exercise in recursion schemes, so I’m aiming more towards clarity than efficiency in here. Therefore, we will represent vectors using Haskell’s standard type for linked lists. But if you want to adapt it to some other type such as <code>Vector</code> or <code>Array</code>, I think the conversion should be pretty straightforward.</p>
+<h2 id="the-discrete-fourier-transform">The Discrete Fourier Transform</h2>
+<p>One way to look at the discrete Fourier transform is as a exchange between orthonormal bases on <span class="math inline">\mathbb{C}^N</span>. Given a vector <span class="math inline">v \in \mathbb{C}^n</span> and a basis <span class="math inline">e_t</span>, we can write <span class="math inline">v</span> as<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display"> v = \sum_{t=0}^{N-1} x_t e_t</span>, where <span class="math inline">(x_0,\ldots, x_{N-1})</span> are the coefficients of <span class="math inline">v</span> on the basis <span class="math inline">e_t</span>. If, for example, <span class="math inline">v</span> represents a discrete temporal series, its coefficients would represent the amplitude at each sampled instant. In a lot of cases, however, we are also interested in the amplitudes for the frequencies of this vector. To calculate those, we exchange to another basis <span class="math inline">f_k</span> (related to <span class="math inline">e_t</span>) called the <em>Fourier basis</em> and write <span class="math inline">v</span> as <span class="math display"> v = \sum_{k=0}^{N-1} y_k f_k</span> where the new coefficients <span class="math inline">y_k</span> are defined as <span class="math display"> y_k = \sum_{t=0}^{N-1} x_t \cdot e^{-{2\pi i \over N}t k}.</span></p>
+<p>We have our first formula, time to implement it in Haskell! Let’s begin by importing the libraries we will need.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">import</span> <span class="dt">Data.Complex</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">import</span> <span class="dt">Data.List</span> (foldr, unfoldr)</span></code></pre></div>
+<p>The functions <code>foldr</code> and <code>unfoldr</code> are, respectively, Haskell’s built-in catamorphism and anamorphism for lists.</p>
+<p>The formula for the <span class="math inline">y</span>’s receives as list of coefficients and returns another list of coefficients</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="ot">dft ::</span> [<span class="dt">Complex</span> <span class="dt">Double</span>] <span class="ot">-&gt;</span> [<span class="dt">Complex</span> <span class="dt">Double</span>]</span></code></pre></div>
+<p>The view we will take in here is that the input represents a parameter and we will build a new list in terms of it. This lends us to the following anamorphism:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>dft xs <span class="ot">=</span> unfoldr coalg <span class="dv">0</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a> <span class="kw">where</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  dim <span class="ot">=</span> <span class="fu">fromIntegral</span> <span class="op">$</span> <span class="fu">length</span> xs</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  coalg k <span class="ot">=</span> <span class="kw">if</span> k <span class="op">&lt;</span> dim</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>            <span class="kw">then</span> <span class="kw">let</span> cfs <span class="ot">=</span> <span class="fu">fmap</span> (\t <span class="ot">-&gt;</span> cis (<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> <span class="fu">pi</span> <span class="op">*</span> k <span class="op">*</span> t <span class="op">/</span> dim))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>                                [<span class="dv">0</span> <span class="op">..</span> dim <span class="op">-</span> <span class="dv">1</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>                     yk  <span class="ot">=</span> <span class="fu">sum</span> (<span class="fu">zipWith</span> (<span class="op">*</span>) cfs xs)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>                 <span class="kw">in</span>  <span class="dt">Just</span> (yk, k <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>            <span class="kw">else</span> <span class="dt">Nothing</span></span></code></pre></div>
+<p>If you’ve never seem the function <code>cis</code> before, it is Haskell’s imaginary exponential <span class="math inline">a \mapsto e^{i a}</span>. The function <code>dft</code> builds the <code>y</code>’s one step at a time. There are <span class="math inline">N</span> coefficients <span class="math inline">y_k</span> and each of them requires <span class="math inline">O(N)</span> calculations, thus the complexity is <span class="math inline">O(N^2)</span>. Although this is not monstrous, it can be a bottleneck for real-time computations. Fortunately we can do better than this.</p>
+<h2 id="the-fast-fourier-transform">The Fast Fourier Transform</h2>
+<p>The function <code>dft</code> implements the Fourier transform exactly as it is defined. However, if you take a look at the coefficients used, you will see that there’s a certain pattern to them. A way to exploit this pattern is encoded in the Danielson-Lanczos Lemma.</p>
+<div class="Lemma">
+<p>In even dimensions, the Fourier transform satisfies <span class="math display"> \begin{aligned}
+y_k &amp;= \sum_{t=0}^{N-1} x_t \cdot e^{-{2\pi i \over N} t k} \\
+    &amp;= \sum_{t=0}^{N/2-1} x_{2t} \cdot e^{-{2\pi i \over (N/2)} t k}
+     + e^{-{2\pi i \over N} k} \sum_{t=0}^{N/2-1} x_{2t + 1} \cdot e^{-{2\pi i \over (N/2)} t k} \\
+    &amp;= y^{(e)}_k + e^{-{2\pi i \over N} k} \cdot y^{(o)}_k.
+\end{aligned}</span> where <span class="math inline">y^{(e)}</span> is the Fourier transform of its even-indexed coefficients and <span class="math inline">y^{(o)}</span> is the Fourier transform of its odd-indexed coefficients.</p>
+</div>
+<p>Well, that’s a lot of symbols… The important part for us is that we can break the DFT into two smaller problems and them merge them back together with a <span class="math inline">O(N)</span> procedure. A divide-and-conquer algorithm!</p>
+<p>Let’s model this as a hylomorphism. For simplicity (and to avoid the boilerplate of fixed points) we will use the direct definition of a hylo.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>hylo f g <span class="ot">=</span> f <span class="op">.</span> <span class="fu">fmap</span> (hylo f g) <span class="op">.</span> g</span></code></pre></div>
+<p>The FFT will take an input list, properly divide it into even and odds indices and then conquer the solution by merging the subproblems into the output list.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="ot">fft ::</span> [<span class="dt">Complex</span> <span class="dt">Double</span>] <span class="ot">-&gt;</span> [<span class="dt">Complex</span> <span class="dt">Double</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>fft <span class="ot">=</span> hylo conquer divide</span></code></pre></div>
+<p>Alright, time to implement the actual algorithm. Let’s begin with the <code>divide</code> method. Our algorithm must take a list of complex numbers and rewrite it as a binary tree whose leafs are sublists of odd dimension and nodes represent splitting an even-dimensional list. The data structure that represents this call tree is</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">CallTree</span> a x <span class="ot">=</span> <span class="dt">Leaf</span> [a] <span class="op">|</span> <span class="dt">Branch</span> x x</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Functor</span> (<span class="dt">CallTree</span> a) <span class="kw">where</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>  <span class="fu">fmap</span> _ (<span class="dt">Leaf</span> xs     ) <span class="ot">=</span> <span class="dt">Leaf</span> xs</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a>  <span class="fu">fmap</span> f (<span class="dt">Branch</span> xs ys) <span class="ot">=</span> <span class="dt">Branch</span> (f xs) (f ys)</span></code></pre></div>
+<p>To bunk of the <code>divide</code> step is splitting a list into even and odd components. We can do this in <span class="math inline">O(n)</span> using a fold from a list to a pair of lists.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ot">split ::</span> [a] <span class="ot">-&gt;</span> ([a], [a])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>split <span class="ot">=</span> <span class="fu">foldr</span> f ([], []) <span class="kw">where</span> f a (v, w) <span class="ot">=</span> (a <span class="op">:</span> w, v)</span></code></pre></div>
+<p>Finally, <code>divide</code> represents one step of constructing the call tree. If the list’s length is even, we split it into smaller lists and store them in a <code>Branch</code> to later apply the Danielson-Lanczos Lemma. In case it is odd, there are no optimizations we can do, thus we just store the list’s DFT in a <code>Leaf</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>divide v <span class="ot">=</span> <span class="kw">if</span> <span class="fu">even</span> (<span class="fu">length</span> v)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>           <span class="kw">then</span> <span class="fu">uncurry</span> <span class="dt">Branch</span> (split v)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>           <span class="kw">else</span> <span class="dt">Leaf</span> (dft v)</span></code></pre></div>
+<p>This constructs the call tree. Now it’s time to deal with the <code>conquer</code> step. First we notice that thanks to the periodicity of the complex exponential (and the famous Euler formula), <span class="math display"> e^{{-2\pi i \over N } (k + {N \over 2})} = -e^{{-2\pi i \over N } k }.</span> From this, we can reconstruct the FFT from the smaller subproblems as <span class="math display">\begin{aligned}
+y_k               &amp;= y^{(e)}_k + e^{-{2\pi i \over N} k} \cdot y^{(o)}_k, \\
+y_{k+{N \over 2}} &amp;= y^{(e)}_k - e^{-{2\pi i \over N} k} \cdot y^{(o)}_k.
+\end{aligned}</span></p>
+<p>In Haskell, we can apply both the reconstruction formulas and then concatenate the results.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>conquer (<span class="dt">Leaf</span> v)       <span class="ot">=</span> v</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>conquer (<span class="dt">Branch</span> ye yo) <span class="ot">=</span> <span class="fu">zipWith3</span> f [<span class="dv">0</span><span class="op">..</span>] ye yo</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>                         <span class="op">++</span> <span class="fu">zipWith3</span> g [<span class="dv">0</span><span class="op">..</span>] ye yo</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a> <span class="kw">where</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>  dim <span class="ot">=</span> <span class="fu">fromIntegral</span> (<span class="dv">2</span> <span class="op">*</span> <span class="fu">length</span> x)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>  f k e o <span class="ot">=</span> e <span class="op">+</span> cis (<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> <span class="fu">pi</span> <span class="op">*</span> k <span class="op">/</span> dim) <span class="op">*</span> o</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>  g k e o <span class="ot">=</span> e <span class="op">-</span> cis (<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> <span class="fu">pi</span> <span class="op">*</span> k <span class="op">/</span> dim) <span class="op">*</span> o</span></code></pre></div>
+<h2 id="conclusion">Conclusion</h2>
+<p>The main advantage of writing code like this is that it is extremely modularized. We have many small almost-independent snippets of code that are combined through the magic of a <code>hylo</code> into an extremely powerful algorithm. As bonus, if you want to test this code by yourself, you can also invert the fft to recover the original coefficients in <span class="math inline">O(N \log N)</span> through</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a>ifft x <span class="ot">=</span> <span class="fu">fmap</span> ((<span class="op">/</span>dim) <span class="op">.</span> conjugate) <span class="op">.</span> fft <span class="op">.</span> <span class="fu">fmap</span> conjugate <span class="op">$</span> x</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>      <span class="kw">where</span> dim <span class="ot">=</span> <span class="fu">fromIntegral</span> (<span class="fu">length</span> x)</span></code></pre></div>
+<p>Another interesting fact I’ve noticed is that, when working with <code>Double</code>s, the <code>fft</code> has much less rounding errors than the <code>dft</code>. This probably occurs because we make less floating-point operations and not because of the hylomorphism. But I thought it worth noticing anyway.</p>
+<p>Well, it’s all for today. Good morphisms to everyone!</p>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>In this context, life gets much easier if the our vectors are zero-indexed.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+<footer id="bottom-bar">
+    <hr/>
+    <span>&copy; Iago Leal de Freitas, 2020</span><br>
+    <span>Made with <a href="https://www.gnu.org/software/make">make</a>
+        and <a href="https://pandoc.org">pandoc</a>
+    </span><br/>
+    <span>Source @ <a href="https://github.com/iagoleal/site">Github</a></span>
+</footer>
+</body>
+</html>
