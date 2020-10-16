@@ -5,7 +5,7 @@
         <meta name="generator" content="pandoc" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
             <meta name="author" content="Iago Leal de Freitas" />
-                    <title>Projects</title>
+                    <title>Projects | Iago Leal</title>
         <style>
             code{white-space: pre-wrap;}
             span.smallcaps{font-variant: small-caps;}
@@ -38,29 +38,49 @@
                 -khtml-user-select: none; -moz-user-select: none;
                 -ms-user-select: none; user-select: none;
                 padding: 0 4px; width: 4em;
+                background-color: #ffffff;
+                color: #a0a0a0;
               }
-            pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+            pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
             div.sourceCode
-              {   }
+              { color: #1f1c1b; background-color: #ffffff; }
             @media screen {
             pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
             }
-            code span.al { font-weight: bold; } /* Alert */
-            code span.an { font-style: italic; } /* Annotation */
-            code span.cf { font-weight: bold; } /* ControlFlow */
-            code span.co { font-style: italic; } /* Comment */
-            code span.cv { font-style: italic; } /* CommentVar */
-            code span.do { font-style: italic; } /* Documentation */
-            code span.dt { text-decoration: underline; } /* DataType */
-            code span.er { font-weight: bold; } /* Error */
-            code span.in { font-style: italic; } /* Information */
-            code span.kw { font-weight: bold; } /* Keyword */
-            code span.pp { font-weight: bold; } /* Preprocessor */
-            code span.wa { font-style: italic; } /* Warning */
+            code span { color: #1f1c1b; } /* Normal */
+            code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+            code span.an { color: #ca60ca; } /* Annotation */
+            code span.at { color: #0057ae; } /* Attribute */
+            code span.bn { color: #b08000; } /* BaseN */
+            code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+            code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+            code span.ch { color: #924c9d; } /* Char */
+            code span.cn { color: #aa5500; } /* Constant */
+            code span.co { color: #898887; } /* Comment */
+            code span.cv { color: #0095ff; } /* CommentVar */
+            code span.do { color: #607880; } /* Documentation */
+            code span.dt { color: #0057ae; } /* DataType */
+            code span.dv { color: #b08000; } /* DecVal */
+            code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+            code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+            code span.fl { color: #b08000; } /* Float */
+            code span.fu { color: #644a9b; } /* Function */
+            code span.im { color: #ff5500; } /* Import */
+            code span.in { color: #b08000; } /* Information */
+            code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+            code span.op { color: #1f1c1b; } /* Operator */
+            code span.ot { color: #006e28; } /* Other */
+            code span.pp { color: #006e28; } /* Preprocessor */
+            code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+            code span.sc { color: #3daee9; } /* SpecialChar */
+            code span.ss { color: #ff5500; } /* SpecialString */
+            code span.st { color: #bf0303; } /* String */
+            code span.va { color: #0057ae; } /* Variable */
+            code span.vs { color: #bf0303; } /* VerbatimString */
+            code span.wa { color: #bf0303; } /* Warning */
         </style>
         <link rel="stylesheet" href="/css/sakura-earthly.css"/>
         <link rel="stylesheet" href="/css/krkis.css"/>
-        <link rel="stylesheet" href="/css/theorems.css"/>
                 <!--[if lt IE 9]>
             <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
         <![endif]-->
@@ -75,7 +95,7 @@
             <div class="nav-links">
                 <li><a href="/posts/">Blog</a></li>
                 <li><a href="/projects/">Projects</a></li>
-                <li><a href="https://github.com/iagoleal">Github</a></li>
+                <li><a href="/about/">About</a></li>
             </div>
         </ul>
         <hr/>
@@ -87,22 +107,22 @@
         </header>
 <p>These are some of the projects that I have been engaged in the last few years. Mostly, the stuff in here is concerned with optimization problems or mathematical modeling.</p>
 <header class="subheading">
-<h2>
+<h2 id="convexification-by-averages">
 Convexification by Averages
 </h2>
 <p>
 Master’s thesis
 </p>
 </header>
-<p><img src="img/cvxavg-thumbnail.svg"
+<p><img src="/img/cvxavg-thumbnail.svg"
      alt="Average of non-convex functions"
      title="Average of non-convex functions can be convex."
      width="95%"/></p>
 <p>This is a work in <strong>non-convex stochastic optimization</strong>. The main concern consists of taking advantage of the natural probabilistic nature of these problems to make them more computationally tractable.</p>
 <p>You can read the <a href="data/mscthesis.pdf">thesis</a> or just take a peek at the <a href="data/mscslides.pdf">defense’s slides</a> to know what it is all about.</p>
-<p>Throughout my Masters, I’ve worked in two technical collaboration projects between UFRJ and the Brazilian Operator of the National Electricity System (ONS). The last project applied the ideas in my thesis to show the possibility of improvement in the convergence of multistage stochastic optimization problems that are fundamental to the Brazilian distribution of energy.</p>
+<p>Throughout my Masters, I’ve worked in two technical collaboration projects between UFRJ and the Brazilian Operator of the National Electricity System (ONS). The last project applied the ideas in my thesis to show the possibility of improvement in the convergence of multistage stochastic optimization problems that are fundamental to the Brazilian distribution of energy. We wrote two technical reports (in Portuguese) for these projects, which can be found <a href="http://www.im.ufrj.br/bernardofpc/relatorios/Relatorio-20172018.pdf">here</a> and <a href="http://www.im.ufrj.br/bernardofpc/relatorios/Relatorio-2019.pdf">here</a>.</p>
 <header class="subheading">
-<h2>
+<h2 id="hodge-jl">
 Hodge.jl
 </h2>
 <p>
@@ -113,14 +133,14 @@ Applications of Hodge Theory to statistical rankings
 <p>The Julia package <code>Hodge.jl</code> is a library implementing the necessary tools of computational algebraic topology to easily utilize the Hodge decomposition. The available structures are representations for simplicial complexes and the algebra of cochains (discrete analogues of differential forms) as well as methods for calculating Betti numbers and the Hodge decomposition.</p>
 <p>If you want to see more of this package, feel free to read the <a href="https://iagoleal.github.io/Hodge.jl/dev/">project’s documentation</a> or take a look at the <a href="https://github.com/iagoleal/Hodge.jl">source code</a>. Comments and contributions are always welcome!</p>
 <header class="subheading">
-<h2>
+<h2 id="deformablebodies-jl">
 DeformableBodies.jl
 </h2>
 <p>
 Simulate the dynamics of self-deforming bodies
 </p>
 </header>
-<p><img src="img/falling-cat.gif"
+<p><img src="/img/falling-cat.gif"
      alt="Falling cat simulation"
      title="A falling cat, as seem from both the perspective of a rotating frame of reference and an inertial one."
      width="95%"/></p>
