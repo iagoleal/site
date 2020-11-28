@@ -110,12 +110,11 @@
                 <li><a href="/">home</a></li>
             </div>
             <div class="nav-links">
-                <li><a href="/posts/">Blog</a></li>
-                <li><a href="/projects/">Projects</a></li>
-                <li><a href="/about/">About</a></li>
+                <li><a href="/posts/">blog</a></li>
+                <li><a href="/projects/">projects</a></li>
+                <li><a href="/about/">about</a></li>
             </div>
         </ul>
-        <hr/>
     </nav>
 </header><header id="title-block-header">
     <header class="subheading">
@@ -128,7 +127,7 @@
 <p>The <a href="https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm">Fast Fourier Transform</a> (FFT for short) uses a divide-and-conquer strategy to allow us to calculate the discrete Fourier transform in <span class="math inline">O(N \log N)</span> (where <span class="math inline">N</span> is the length of the input). It has a myriad of applications, specially in signal processing and data analysis.</p>
 <p>But today I am not explaining it. Oh no, that would require a much longer post. Today we will only use the FFT as an example of how to write a fully fetched algorithm using neither loops nor explicit recursion. Since it is more complicated than the previous post’s examples, this time we will need a real programming language, thus everything will be in Haskell. I did this implementation as an exercise in recursion schemes, so I’m aiming more towards clarity than efficiency in here. Therefore, we will represent vectors using Haskell’s standard type for linked lists. But if you want to adapt it to some other type such as <code>Vector</code> or <code>Array</code>, I think the conversion should be pretty straightforward.</p>
 <h2 id="the-discrete-fourier-transform">The Discrete Fourier Transform</h2>
-<p>One way to look at the discrete Fourier transform is as a exchange between orthonormal bases on <span class="math inline">\mathbb{C}^N</span>. Given a vector <span class="math inline">v \in \mathbb{C}^n</span> and a basis <span class="math inline">e_t</span>, we can write <span class="math inline">v</span> as<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display"> v = \sum_{t=0}^{N-1} x_t e_t</span>, where <span class="math inline">(x_0,\ldots, x_{N-1})</span> are the coefficients of <span class="math inline">v</span> on the basis <span class="math inline">e_t</span>. If, for example, <span class="math inline">v</span> represents a discrete temporal series, its coefficients would represent the amplitude at each sampled instant. In a lot of cases, however, we are also interested in the amplitudes for the frequencies of this vector. To calculate those, we exchange to another basis <span class="math inline">f_k</span> (related to <span class="math inline">e_t</span>) called the <em>Fourier basis</em> and write <span class="math inline">v</span> as <span class="math display"> v = \sum_{k=0}^{N-1} y_k f_k</span> where the new coefficients <span class="math inline">y_k</span> are defined as <span class="math display"> y_k = \sum_{t=0}^{N-1} x_t \cdot e^{-{2\pi i \over N}t k}.</span></p>
+<p>One way to look at the discrete Fourier transform is as a exchange between orthonormal bases on <span class="math inline">\mathbb{C}^N</span>. Given a vector <span class="math inline">v \in \mathbb{C}^n</span> and a basis <span class="math inline">e_t</span>, we can write <span class="math inline">v</span> as<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display">v = \sum_{t=0}^{N-1} x_t e_t,</span> where <span class="math inline">(x_0,\ldots, x_{N-1})</span> are the coefficients of <span class="math inline">v</span> on the basis <span class="math inline">e_t</span>. If, for example, <span class="math inline">v</span> represents a discrete temporal series, its coefficients would represent the amplitude at each sampled instant. In a lot of cases, however, we are also interested in the amplitudes for the frequencies of this vector. To calculate those, we exchange to another basis <span class="math inline">f_k</span> (related to <span class="math inline">e_t</span>) called the <em>Fourier basis</em> and write <span class="math inline">v</span> as <span class="math display"> v = \sum_{k=0}^{N-1} y_k f_k</span> where the new coefficients <span class="math inline">y_k</span> are defined as <span class="math display"> y_k = \sum_{t=0}^{N-1} x_t \cdot e^{-{2\pi i \over N}t k}.</span></p>
 <p>We have our first formula, time to implement it in Haskell! Let’s begin by importing the libraries we will need.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">import</span> <span class="dt">Data.Complex</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">import</span> <span class="dt">Data.List</span> (foldr, unfoldr)</span></code></pre></div>
@@ -149,20 +148,23 @@
 <h2 id="the-fast-fourier-transform">The Fast Fourier Transform</h2>
 <p>The function <code>dft</code> implements the Fourier transform exactly as it is defined. However, if you take a look at the coefficients used, you will see that there’s a certain pattern to them. A way to exploit this pattern is encoded in the Danielson-Lanczos Lemma.</p>
 <div class="Lemma">
-<p>In even dimensions, the Fourier transform satisfies <span class="math display"> \begin{aligned}
+<p>In even dimensions, the Fourier transform satisfies <span class="math display">y_k = y^{(e)}_k + e^{-{2\pi i \over N} k} \cdot y^{(o)}_k,</span> where <span class="math inline">y^{(e)}</span> is the Fourier transform of its even-indexed coefficients and <span class="math inline">y^{(o)}</span> is the Fourier transform of its odd-indexed coefficients.</p>
+</div>
+<div class="Proof">
+<p><span class="math display"> \begin{aligned}
 y_k &amp;= \sum_{t=0}^{N-1} x_t \cdot e^{-{2\pi i \over N} t k} \\
     &amp;= \sum_{t=0}^{N/2-1} x_{2t} \cdot e^{-{2\pi i \over (N/2)} t k}
      + e^{-{2\pi i \over N} k} \sum_{t=0}^{N/2-1} x_{2t + 1} \cdot e^{-{2\pi i \over (N/2)} t k} \\
     &amp;= y^{(e)}_k + e^{-{2\pi i \over N} k} \cdot y^{(o)}_k.
-\end{aligned}</span> where <span class="math inline">y^{(e)}</span> is the Fourier transform of its even-indexed coefficients and <span class="math inline">y^{(o)}</span> is the Fourier transform of its odd-indexed coefficients.</p>
+\end{aligned}</span></p>
 </div>
-<p>Well, that’s a lot of symbols… The important part for us is that we can break the DFT into two smaller problems and them merge them back together with a <span class="math inline">O(N)</span> procedure. A divide-and-conquer algorithm!</p>
+<p>Well, that’s a lot of symbols… The important part for us is that we can break the DFT into two smaller problems and then merge them back together with a <span class="math inline">O(N)</span> procedure. A divide-and-conquer algorithm!</p>
 <p>Let’s model this as a hylomorphism. For simplicity (and to avoid the boilerplate of fixed points) we will use the direct definition of a hylo.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>hylo f g <span class="ot">=</span> f <span class="op">.</span> <span class="fu">fmap</span> (hylo f g) <span class="op">.</span> g</span></code></pre></div>
 <p>The FFT will take an input list, properly divide it into even and odds indices and then conquer the solution by merging the subproblems into the output list.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="ot">fft ::</span> [<span class="dt">Complex</span> <span class="dt">Double</span>] <span class="ot">-&gt;</span> [<span class="dt">Complex</span> <span class="dt">Double</span>]</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>fft <span class="ot">=</span> hylo conquer divide</span></code></pre></div>
-<p>Alright, time to implement the actual algorithm. Let’s begin with the <code>divide</code> method. Our algorithm must take a list of complex numbers and rewrite it as a binary tree whose leafs are sublists of odd dimension and nodes represent splitting an even-dimensional list. The data structure that represents this call tree is</p>
+<p>Alright, time to implement the actual algorithm. Let’s begin with the <code>divide</code> step. Our algorithm must take a list of complex numbers and rewrite it as a binary tree whose leafs are sublists of odd dimension and nodes represent splitting an even-dimensional list. The data structure that represents this call tree is</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">CallTree</span> a x <span class="ot">=</span> <span class="dt">Leaf</span> [a] <span class="op">|</span> <span class="dt">Branch</span> x x</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Functor</span> (<span class="dt">CallTree</span> a) <span class="kw">where</span></span>
@@ -200,7 +202,6 @@ y_{k+{N \over 2}} &amp;= y^{(e)}_k - e^{-{2\pi i \over N} k} \cdot y^{(o)}_k.
 </ol>
 </section>
 <footer id="bottom-bar">
-    <hr/>
     <span>&copy; Iago Leal de Freitas, 2020</span><br>
     <span>Made with <a href="https://www.gnu.org/software/make">make</a>
         and <a href="https://pandoc.org">pandoc</a>
