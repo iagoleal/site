@@ -79,12 +79,12 @@ This lends us to the following anamorphism:
 dft xs = unfoldr coalg 0
  where
   dim = fromIntegral $ length xs
+  chi k t = cis (-2 * pi * k * t / dim)
   coalg k = if k < dim
-            then let cfs = fmap (\t -> cis (-2 * pi * k * t / dim))
-                                [0 .. dim - 1]
-                     yk  = sum (zipWith (*) cfs xs)
-                 in  Just (yk, k + 1)
-            else Nothing
+             then let cfs = fmap (chi k) [0 .. dim - 1]
+                      yk  = sum (zipWith (*) cfs xs)
+                  in  Just (yk, k + 1)
+             else Nothing
 ```
 
 If you've never seem the function `cis` before,
@@ -156,8 +156,8 @@ instance Functor (CallTree a) where
   fmap f (Branch xs ys) = Branch (f xs) (f ys)
 ```
 
-To bunk of the `divide` step is splitting a list into even and odd components.
-We can do this in $O(n)$ using a fold from a list to a pair of lists.
+The bunk of the `divide` method consists of splitting a list into even and odd components.
+We can do this in $O(n)$ steps using a fold from a list to a pair of lists.
 
 ```haskell
 split :: [a] -> ([a], [a])
@@ -174,8 +174,8 @@ thus we just store the list's DFT in a `Leaf`.
 
 ```haskell
 divide v = if even (length v)
-           then uncurry Branch (split v)
-           else Leaf (dft v)
+            then uncurry Branch (split v)
+            else Leaf (dft v)
 ```
 
 This constructs the call tree.
